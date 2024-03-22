@@ -1,12 +1,18 @@
-
-import { useCallback } from "react";
+"use client"
+import { useCallback, useState } from "react";
 import { useMyPresence, useOthers } from "../../liveblocks.config"
 import LiveCursors from "./cursor/LiveCursors"
+import { CursorMode } from "@/types/type";
+import CursorChat from "./cursor/CursorChat";
 export default function Live() {
 
     const others = useOthers(); 
 
     const [{cursor}, updateMyPresence] = useMyPresence() as any ; 
+
+    const [cursorState , setCursorState] = useState({
+        mode: CursorMode.Hidden
+    })
 
     const handlePointerMove = useCallback((event : React.PointerEvent) => {
         event.preventDefault() ; 
@@ -31,7 +37,10 @@ export default function Live() {
     }, [])
 
     const handlePointerLeave = useCallback((event : React.PointerEvent) => {
-        event.preventDefault() ; 
+        
+        setCursorState({
+            mode: CursorMode.Hidden
+        })
 
         updateMyPresence({cursor : null, message: null})
     }, [])
@@ -45,6 +54,12 @@ export default function Live() {
         >
             <h3 className="text-4xl"> Minimalist Figma  </h3> 
             <LiveCursors others={others} />
+
+
+            <CursorChat cursor={cursor} 
+            cursorState={cursorState}
+            setCursorState={setCursorState}
+            updateMyPresence={updateMyPresence} />
         </div>
     )
 }
