@@ -10,9 +10,7 @@ export default function Live() {
 
     const [{cursor}, updateMyPresence] = useMyPresence() as any ; 
 
-    const [cursorState , setCursorState] = useState({
-        mode: CursorMode.Hidden
-    })
+    const [cursorState , setCursorState] = useState({ mode: CursorMode.Hidden })
 
     const handlePointerMove = useCallback((event : React.PointerEvent) => {
         event.preventDefault() ; 
@@ -55,11 +53,15 @@ export default function Live() {
             <h3 className="text-4xl"> Minimalist Figma  </h3> 
             <LiveCursors others={others} />
 
-
-            <CursorChat cursor={cursor} 
-            cursorState={cursorState}
-            setCursorState={setCursorState}
-            updateMyPresence={updateMyPresence} />
+            {
+                cursor && (
+                     <CursorChat cursor={cursor} 
+                    cursorState={cursorState}
+                    setCursorState={setCursorState}
+                    updateMyPresence={updateMyPresence} />
+                )
+            }
+           
         </div>
     )
 }
