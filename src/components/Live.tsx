@@ -117,7 +117,7 @@ export default function Live() {
         >
             <h3 className="text-4xl"> Minimalist Figma  </h3> 
             <LiveCursors others={others} />
-
+            {/** track and display chat mode  */}
             {
                 cursor && (
                      <CursorChat cursor={cursor} 
@@ -126,6 +126,8 @@ export default function Live() {
                     updateMyPresence={updateMyPresence} />
                 )
             }
+
+              {/** track and display reaction selector mode  */}
 
             {
                 cursorState.mode === CursorMode.ReactionSelector && (
