@@ -1,10 +1,12 @@
 "use client"
 import { useCallback, useEffect, useState } from "react";
-import { useMyPresence, useOthers } from "../../liveblocks.config"
+import { useBroadcastEvent, useEventListener, useMyPresence, useOthers } from "../../liveblocks.config"
 import LiveCursors from "./cursor/LiveCursors"
-import { CursorMode, CursorState, Reaction } from "@/types/type";
+import { CursorMode, CursorState, Reaction, ReactionEvent } from "@/types/type";
 import CursorChat from "./cursor/CursorChat";
 import ReactionSelector from "./reaction/ReactionButton";
+import FlyingReaction from "./reaction/FlyingReaction";
+import useInterval from "@/hooks/useInterval";
 export default function Live() {
 
     const others = useOthers(); 
@@ -14,6 +16,10 @@ export default function Live() {
     const [cursorState , setCursorState] = useState<CursorState>({ mode: CursorMode.Hidden })
 
     const [reactions, setReaction] = useState<Reaction[]>([])
+
+    // broadcast event to the others users in room 
+
+    const broadcast = useBroadcastEvent(); 
 
     const handlePointerMove = useCallback((event : React.PointerEvent) => {
         event.preventDefault() ; 
@@ -59,6 +65,51 @@ export default function Live() {
         updateMyPresence({cursor : null, message: null})
     }, [])
 
+    
+
+    // track and apply fly reaction effect 
+
+    useInterval(() => {
+        if(cursor && cursorState.mode === CursorMode.Reaction && cursorState.isPressed) {
+
+            setReaction((reactions) => reactions.concat([
+                {
+                    point : {x: cursor.x , y: cursor.y}, 
+                    value : cursorState.reaction, 
+                    timestamp :  Date.now()
+                }
+            ]))
+
+            broadcast({
+                x : cursor.x, 
+                y: cursor.y, 
+                value : cursorState.reaction
+            })
+        }
+    }, 100)
+
+
+
+    // listening reaction event 
+
+    useEventListener((eventData) => {
+
+        const event = eventData.event as ReactionEvent; 
+
+        setReaction((reactions) => reactions.concat([
+            {
+                point : {x: event.x , y: event.y}, 
+                value : event.value, 
+                timestamp :  Date.now()
+            }
+        ]))
+    })
+
+    // limit flying reaction duration 
+
+    useInterval(() => {
+        setReaction((reaction) => reaction.filter((react) => react.timestamp > Date.now() - 4000))
+    }, 1000)
 
     // track Cursor Chat mode
     
@@ -75,7 +126,7 @@ export default function Live() {
 
                 updateMyPresence({message : ''}) ;
                 setCursorState({mode : CursorMode.Hidden})
-            }else if (e.key === 'e') {
+            }else if (e.key === '$') {
                 setCursorState({
                     mode: CursorMode.ReactionSelector,
 
@@ -117,6 +168,21 @@ export default function Live() {
         >
             <h3 className="text-4xl"> Minimalist Figma  </h3> 
             <LiveCursors others={others} />
+
+            {/** Flying reaction  */}
+
+            {
+                reactions.map((reaction) => (
+                    <FlyingReaction 
+                    key={reaction.timestamp.toString()}
+                    x={reaction.point.x}
+                    y={reaction.point.y}
+                    timestamp={reaction.timestamp}
+                    value={reaction.value}
+                    />
+                ))
+            }
+
             {/** track and display chat mode  */}
             {
                 cursor && (
