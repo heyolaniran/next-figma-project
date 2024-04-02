@@ -8,6 +8,13 @@ export enum CursorMode {
   Reaction,
 }
 
+export type CursorProps = {
+  color : string, 
+  x: number, 
+  y:number, 
+  message : string
+}
+
 export type CursorState =
   | {
       mode: CursorMode.Hidden;
