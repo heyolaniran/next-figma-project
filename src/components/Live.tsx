@@ -115,7 +115,8 @@ export default function Live() {
         onPointerLeave={handlePointerLeave}
         className="min-h-screen w-full flex justify-center items-center text-center"
         >
-            <h3 className="text-4xl"> Minimalist Figma  </h3> 
+            <canvas />
+             
             <LiveCursors others={others} />
             {/** track and display chat mode  */}
             {
